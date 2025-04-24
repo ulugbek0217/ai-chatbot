@@ -25,6 +25,10 @@ func Greeting(ctx context.Context, b *bot.Bot, upd *models.Update) {
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: upd.Message.Chat.ID,
 		Text:   "Привет! Добро пожаловать в Startup House! 🚀",
+		ReplyParameters: &models.ReplyParameters{
+			MessageID: upd.Message.ID,
+			ChatID:    upd.Message.Chat.ID,
+		},
 	})
 }
 
@@ -37,7 +41,7 @@ func AnswerAI(ctx context.Context, b *bot.Bot, upd *models.Update) {
 		return
 	}
 	currentTime = time.Now()
-	if strings.Contains(upd.Message.Text, "/ai") {
+	if strings.EqualFold(upd.Message.Text, "/ai") {
 		fmt.Printf("[%d-%02d-%02dT%02d:%02d:%-2d] got /ai command\n",
 			currentTime.Year(), currentTime.Month(), currentTime.Day(),
 			currentTime.Hour(), currentTime.Minute(), currentTime.Second())
@@ -81,8 +85,9 @@ func AnswerAI(ctx context.Context, b *bot.Bot, upd *models.Update) {
 		}
 	}
 
-	if filters.AboutAI(upd) {
-		interesting, err := AIResponse("Задавай короткий вопрос про ии, добавь эмодзи в свой вопрос")
+	if filters.IsAboutAI(upd) {
+		interesting, err := AIResponse(fmt.Sprintf("Задавай короткий вопрос, добавь эмодзи в свой вопрос:\n%s",
+			upd.Message.Text))
 		if err != nil {
 			log.Printf("err interesting in ai: %v", err)
 		}
@@ -157,5 +162,6 @@ func AIResponse(message string) (string, error) {
 			}
 		}
 	}
-	return "Error generating response", err
+	fmt.Println(prettyJson.String())
+	return "Извините, произошла внутренняя ошибка.", err
 }

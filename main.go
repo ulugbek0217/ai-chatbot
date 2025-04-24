@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/go-telegram/bot"
+	"github.com/ulugbek0217/startup-house/filters"
 	"github.com/ulugbek0217/startup-house/handlers"
 	"github.com/ulugbek0217/startup-house/misc"
 )
@@ -23,7 +24,7 @@ func main() {
 	defer cancel()
 
 	opts := []bot.Option{
-		bot.WithMessageTextHandler("привет", bot.MatchTypeContains, handlers.Greeting),
+		// bot.WithMessageTextHandler("привет", bot.MatchTypeContains, handlers.Greeting),
 		bot.WithMessageTextHandler("ии", bot.MatchTypeContains, handlers.AnswerAI),
 		bot.WithDefaultHandler(handlers.AnswerAI),
 		bot.WithSkipGetMe(),
@@ -34,17 +35,9 @@ func main() {
 		panic(err)
 	}
 
-	// b.RegisterHandlerMatchFunc(filters.AboutAI, handlers.AnswerAI)
+	b.RegisterHandlerMatchFunc(filters.IsGreeting, handlers.Greeting)
 
 	fmt.Println("Listening...")
 
 	b.Start(ctx)
-
-	// resp, err := http.Post(url, "application/json", bytes.NewReader(json_body))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// respBody := resp.Body
-	// response := json.Unmarshal(respBody)
-
 }
